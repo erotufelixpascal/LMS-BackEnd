@@ -28,7 +28,7 @@ urlpatterns = [
     # path('tests', include(router.urls)),
     path('admin/', admin.site.urls),
     # path('users', manager_views.CustomerListCreateView.as_view()),
-    path('users/<str:customerID>/', manager_views.UserDetail.as_view(), name='user-detail'),
+    # path('users/<uuid:customerID>/', manager_views.UserDetail.as_view(), name='user-detail'),
     # path('users/customerID/', manager_views.UserDetail.as_view(), name='user-detail'),
     path('user-roles', manager_views.loanUsersListCreateView.as_view(), name='user-roles'),
     path('loan-categories', manager_views.loanCategoryListCreateView.as_view()),
@@ -39,6 +39,7 @@ urlpatterns = [
     path('loan-application/approved', manager_views.LoanViewSet.as_view()),
     path('loan-application/disbursed', manager_views.LoanViewSet.as_view()),
     path('user-roles/<str:userType>/', manager_views.UserRoleView.as_view(), name='user-roles'),
+    path('users/<str:email>/', manager_views.UserDetail.as_view(), name='user-detail'),
     path('users', manager_views.UserViewSet.as_view(), name='user-roles-roles'),
     path('loan-statistics/', manager_views.LoanStatisticsView.as_view(), name='loan-statistics'),
     path('', loan_views.LoanApplicationListCreateView.as_view())

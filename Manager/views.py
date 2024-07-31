@@ -50,9 +50,13 @@ class UserRoleView(generics.ListCreateAPIView):
         return JsonResponse(user_roles_list, safe=False)
     
 class UserDetail(generics.ListCreateAPIView):
-    queryset = Users.objects.all()
-    serializer_class = UserSerializer
-    lookup_field = 'customerID'
+    # queryset = Users.objects.all()
+    # serializer_class = UserSerializer
+    # lookup_field = 'customerID'
+    def get(self, request, email):
+        user_detail = Users.objects.filter(email=email)
+        user_detail_list = list(user_detail.values())
+        return JsonResponse(user_detail_list, safe=False)
 
 #returning http://127.0.0.1:8000/users?userRole=5
 class UserViewSet(generics.ListCreateAPIView):
