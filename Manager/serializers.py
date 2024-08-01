@@ -31,7 +31,7 @@ class LoanSerializer(serializers.ModelSerializer):
 
 class LoanStatisticsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Users
+        model = LoanApplication
         fields = '__all__'
 
 # ##here starts a new

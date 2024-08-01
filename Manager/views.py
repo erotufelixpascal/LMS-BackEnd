@@ -71,21 +71,63 @@ class UserViewSet(generics.ListCreateAPIView):
         return queryset
     
 #returning statistics
+#returning http://127.0.0.1:8000/statistics?userRole=5
+# GET /loan-statistics/?staff_id=1
+# http://127.0.0.1:8000/loans?userRole=5
 class LoanStatisticsView(generics.ListCreateAPIView):
-    queryset = LoanApplication.objects.all()
     serializer_class = LoanStatisticsSerializer
 
-    def get(self, request):
-        loans_applied = LoanApplication.objects.filter(status='Applied').count()
-        loans_disbursed = LoanApplication.objects.filter(status='Disbursed').count()
-        loans_recovered = LoanApplication.objects.filter(status='Recovered').count()
-        loans_pending = LoanApplication.objects.filter(status='Pending').count()
-        
-        data = {
-            'loans_applied': loans_applied,
-            'loans_disbursed': loans_disbursed,
-            'loans_recovered': loans_recovered,
-            'loans_pending': loans_pending
-        }
-        
-        return Response(data)
+    def get(self, request, *args, **kwargs):
+        user_role = request.query_params.get('userRole', None)
+        if user_role is not None:
+            loans_data = LoanApplication.objects.filter(customerID__userRole=user_role)
+        else:
+            loans_data = LoanApplication.objects.all()
+    
+        if user_role is not None:
+            users_data = Users.objects.filter(userRole=user_role)
+        else:
+            users_data = Users.objects.all()
+
+        loan_serialized = LoanSerializer(loans_data, many=True)
+
+        response_data = []
+
+        for user in users_data:
+            loans_data = LoanApplication.objects.filter(customerID=user)
+
+            loans_applied = loans_data.filter(status='Applied').count()
+            loans_disbursed = loans_data.filter(status='Disbursed').count()
+            loans_recovered = loans_data.filter(status='Recovered').count()
+            loans_pending = loans_data.filter(status='Pending').count()
+
+            total_loans_handled = loans_applied + loans_disbursed + loans_recovered + loans_pending
+
+            if total_loans_handled > 0:
+                effectiveness = ((loans_disbursed + loans_recovered) / total_loans_handled) * 100
+            else:
+                effectiveness = 0
+
+            user_data = {
+                'customerID': user.customerID,
+                'firstName': user.firstName,
+                'lastName': user.lastName,
+                'email': user.email,
+                'address': user.address,
+                'designation': user.designation,
+                'phone': user.phone,
+                'information': user.information,
+                # 'userRole': user.userRole,
+                # 'loans': LoanSerializer(loans_data, many=True).data,
+                'loans': loan_serialized.data,
+                'loans_applied': loans_applied,
+                'loans_disbursed': loans_disbursed,
+                'loans_recovered': loans_recovered,
+                'loans_pending': loans_pending,
+                'effectiveness': effectiveness
+            }
+
+            response_data.append(user_data)
+        return Response(response_data)
+
+            

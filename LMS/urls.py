@@ -41,7 +41,8 @@ urlpatterns = [
     path('user-roles/<str:userType>/', manager_views.UserRoleView.as_view(), name='user-roles'),
     path('users/<str:email>/', manager_views.UserDetail.as_view(), name='user-detail'),
     path('users', manager_views.UserViewSet.as_view(), name='user-roles-roles'),
-    path('loan-statistics/', manager_views.LoanStatisticsView.as_view(), name='loan-statistics'),
+    # path('loan-statistics/', manager_views.LoanStatisticsView.as_view(), name='loan-statistics'),
+    path('loan-statistics', manager_views.LoanStatisticsView.as_view(), name='loan_statistics'),
     path('', loan_views.LoanApplicationListCreateView.as_view())
 
 ]
