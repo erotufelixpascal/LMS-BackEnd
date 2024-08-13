@@ -95,12 +95,11 @@ class LoanStatisticsView(generics.ListCreateAPIView):
 
         for user in users_data:
             loans_data = LoanApplication.objects.filter(customerID=user)
-
             loans_applied = loans_data.filter(status='Applied').count()
             loans_disbursed = loans_data.filter(status='Disbursed').count()
             loans_recovered = loans_data.filter(status='Recovered').count()
             loans_pending = loans_data.filter(status='Pending').count()
-
+            
             total_loans_handled = loans_applied + loans_disbursed + loans_recovered + loans_pending
 
             if total_loans_handled > 0:
