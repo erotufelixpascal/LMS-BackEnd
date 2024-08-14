@@ -29,6 +29,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user-roles', manager_views.loanUsersListCreateView.as_view(), name='user-roles'),
     path('loan-categories', manager_views.loanCategoryListCreateView.as_view()),
+    path('loans', loan_views.LoansListCreateView.as_view()),
     path('loan-terms', manager_views.loanTermListCreateView.as_view()),
     path('loan-application', loan_views.LoanApplicationListCreateView.as_view()),
     # path('loan-application/?status=pending', manager_views.LoanViewSet.as_view()),

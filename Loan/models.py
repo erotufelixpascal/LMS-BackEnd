@@ -6,6 +6,9 @@ from Manager.models import Users, loanCategorys
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+
 
 # default_customer = Users.objects.first()  ,default=default_customer- '18c8ca88c8834e4e921d007110232d74'
 
@@ -44,12 +47,15 @@ class Payment(models.Model):
     principal = models.DecimalField(max_digits=10, decimal_places=2)
     interest = models.DecimalField(max_digits=10, decimal_places=2)
     balance = models.DecimalField(max_digits=10, decimal_places=2)
+    term = models.IntegerField(default=1) #in months
     payment_date = models.DateTimeField(default=timezone.now)
     next_payment_date = models.DateTimeField()
 
     def save(self, *args, **kwargs):
         self.totalAmount = self.principal + self.interest
-        self.balance = self.balance - self.totalAmount
+        self.balance = self.balance - self.principal
+        self.next_payment_date = self.payment_date + relativedelta(months=self.term)
+        
         super(Payment, self).save(*args, **kwargs)
     
 # @shared_task

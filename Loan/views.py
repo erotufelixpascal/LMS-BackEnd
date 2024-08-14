@@ -3,7 +3,7 @@ from django.shortcuts import render
 from Loan.models import LoanApplication, Payment
 from rest_framework import generics
 from rest_framework.response import Response
-from Loan.serializers import LoanApplicationSerializer, PaymentSerializer
+from Loan.serializers import LoanApplicationSerializer, LoanSerializer, PaymentSerializer
 from datetime import timedelta
 
 # Create your views here.
@@ -12,18 +12,23 @@ class LoanApplicationListCreateView(generics.ListCreateAPIView):
     queryset = LoanApplication.objects.all()
     serializer_class = LoanApplicationSerializer
 
-class ScheduleViewSet(generics.ListCreateAPIView):
+class LoansListCreateView(generics.ListCreateAPIView):
     queryset = LoanApplication.objects.all()
-    serializer_class = LoanApplicationSerializer
+    serializer_class = LoanSerializer
 
-    def perform_create(self, serializer):
-        loan = serializer.save()
-        # loan_serialized = LoanSerializer(loans_data, many=True)
+class ScheduleViewSet(generics.ListCreateAPIView):
+    queryset = Payment.objects.all().order_by('loanNumber')
+    serializer_class = PaymentSerializer
+
+    # def perform_create(self, serializer):
+    def perform_create(self,request):
+        payment = request.save()
         schedule = []
         # Loan details
-        loan_amount = loan.totalAmount
-        interest_rate = loan.interestAmount / 12 / 100  # Convert annual rate to monthly
-        term_in_months = loan.term
+        loan_amount = payment.totalAmount
+        # interest_rate = Payment.interest / 12  # Convert annual rate to monthly
+        interest_rate = payment.interest # Convert annual rate to monthly
+        term_in_months = payment.term
         # term_in_months = 4
 
         # Calculate EMI(Equated Monthly Installment)
@@ -34,7 +39,7 @@ class ScheduleViewSet(generics.ListCreateAPIView):
             interest_payment = balance * interest_rate
             principal_payment = emi - interest_payment
             balance -= principal_payment
-
+        
             # Create repayment schedule entry
             # Payment.objects.create(
             #     # loanNumber
@@ -42,25 +47,25 @@ class ScheduleViewSet(generics.ListCreateAPIView):
             #     principal =principal_payment,
             #     interest = interest_payment,
             #     balance =balance,
-            #     payment_date =loan.start_date + timedelta(days=30*(month+1)),
-            #     next_payment_date =loan.start_date + timedelta(days=30*(month+1))    
+            #     payment_date=LoanApplication.disbursedAt,
+            #     next_payment_date=LoanApplication.disbursedAt,
+            #     # payment_date =loan.start_date + timedelta(days=30*(month+1)),
+            #     # next_payment_date =loan.start_date + timedelta(days=30*(month+1))    
             #     # installment_number=month + 1,
             # )
+            # schedule.append(Payment)
             schedule.append({
                 'totalAmount':emi,
                 'principal':principal_payment,
                 'interest': interest_payment,
                 'balance':balance,
-                'payment_date':loan.disbursedAt + timedelta(days=30*(month+1)),
-                'next_payment_date':loan.disbursedAt + timedelta(days=30*(month+1)) 
-                # installment_number=month + 1,
+                'payment_date':LoanApplication.disbursedAt,
+                'next_payment_date':LoanApplication.disbursedAt,
+                # 'Month': month + 1,
+                # 'installment_number'=month + 1
             })
 
         return Response(schedule)
-
-    def get_queryset(self):
-        loan_id = self.kwargs.get('loan_id')
-        return LoanApplication.objects.filter(loanNumber=loan_id)
 
 class PaymentViewSet(generics.ListCreateAPIView):
     queryset = Payment.objects.all()
